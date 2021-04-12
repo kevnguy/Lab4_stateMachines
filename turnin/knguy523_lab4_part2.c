@@ -27,7 +27,7 @@ void Tick_C(){
             c_state = C_waitPress;
             break;
         case C_waitPress:
-            if(btn1 & !btn2){
+            if(btn1 && !btn2){
                 c_state = C_inc;
             }
             else if(!btn1 && btn2){
