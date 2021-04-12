@@ -66,6 +66,7 @@ int main(void) {
 	DDRB = 0xFF; PORTB = 0x01;	// PORTB is output
     /* Insert your solution below */
 	unsigned char tempB = 0x00;
+	LED_state = LED_init;
     while (1) {
         Tick_LED();
     }
