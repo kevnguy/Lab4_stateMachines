@@ -1,10 +1,10 @@
 /*	Author: Kevin Nguyen knguy523@ucr.edu
  *  Partner(s) Name: 
  *	Lab Section:
- *	Assignment: Lab #4  Exercise #3
+ *	Assignment: Lab Pnd4  Exercise Pnd3
  *	Exercise Description: A household has a digital combination deadbolt lock system on the doorway. 
- *	The system has buttons on a keypad. Button 'X' connects to PA0, 'Y' to PA1, and '#' to PA2. Pressing
- *	and releasing '#', then pressing 'Y', should unlock the door by setting PB0 to 1. Any other sequence
+ *	The system has buttons on a keypad. Button 'X' connects to PA0, 'Y' to PA1, and 'Pnd' to PA2. Pressing
+ *	and releasing 'Pnd', then pressing 'Y', should unlock the door by setting PB0 to 1. Any other sequence
  *	fails to unlock. Pressing a button from inside the house (PA7) locks the door (PB0=0). For debugging
  *	purposes, give each state a number, and always write the current state to PORTC (consider using the
  *	enum state variable). Also, be sure to check that only one button is pressed at a time. 
@@ -18,34 +18,34 @@
 #include "simAVRHeader.h"
 #endif
 
-enum l_states {l_start, l_init, l_waitPress#, l_#, l_unlock, l_lock} l_state;
+enum l_states {l_start, l_init, l_waitPressPnd, l_Pnd, l_unlock, l_lock} l_state;
 
-void Tick_C(){
+void Tick(){
     unsigned char btnX = PINA & 0x01;
     unsigned char btnY = PINA & 0x02;
-    unsigned char btn# = PINA & 0x06;
+    unsigned char btnPnd = PINA & 0x06;
     unsigned char btnL = PINA & 0x80;
     switch(l_state){
-        case C_start:
+        case l_start:
             l_state = l_init;
             break;
-	case C_init:
-            l_state = l_waitPress#;
+	case l_init:
+            l_state = l_waitPressPnd;
             break;
-        case l_waitPress#:
-            if(!btnX && !btnY && !btnL && btn#){
-                l_state = l_#;
+        case l_waitPressPnd:
+            if(!btnX && !btnY && !btnL && btnPnd){
+                l_state = l_Pnd;
             }
             else{
-                l_state = l_waitPress#;
+                l_state = l_waitPressPnd;
             }
             break;
-        case l_#:
-	    if(!btnX && btnY && !btnL && !btn#){
+        case l_Pnd:
+	    if(!btnX && btnY && !btnL && !btnPnd){
 		l_state = l_unlock;
 	    }
-	    else if(btn#){
-		l_state = l_#;
+	    else if(btnPnd){
+		l_state = l_Pnd;
 	    }
 	    else{
 		l_state = l_init;
@@ -62,32 +62,30 @@ void Tick_C(){
 		l_state = l_lock;
             break;
         case l_lock:
-	    l_state = l_waitPress#;
+	    l_state = l_waitPressPnd;
         default:
             l_state = l_init;
             break;
     }
 
     switch(l_state){
-        case C_init:
-            PORTC = 0x07; break;
-        case C_waitPress:
+        case l_init:
+            PORTC = l_state;
+	    PORTB = 0x00; 
+	    break;
+        case l_waitPressPnd:
+	    PORTC = l_state;
             break;
-        case C_inc:
-            if(PORTC < 0x09){
-                PORTC++;
-            }
+        case l_Pnd:
+	    PORTC = l_state;
             break;
-        case C_dec:
-            if(PORTC > 0x00){
-                PORTC--;
-            }
-            break;
-        case C_waitFall:
-            break;
-        case C_reset:
-            PORTC = 0x00; break;
-        case C_waitFallR:
+        case l_unlock:
+            PORTC = l_state;
+	    PORTB = 0x01;
+	    break;
+        case l_lock:
+	    PORTC = l_state;
+	    PORTB = 0x00;
             break;
         default:
             break;
@@ -97,12 +95,13 @@ void Tick_C(){
 
 int main(void) {
     /* Insert DDR and PORT initializations */
-	DDRA = 0x00; PORTA = 0x03;	// PORTA is input
-	DDRC = 0xFF; PORTB = 0x00;	// PORTC is output
+	DDRA = 0x00; PORTA = 0x87;	// PORTA is input
+	DDRB = 0xFF; PORTB = 0x00;	// PORTB is output for lock
+	DDRC = 0xFF; PORTB = 0x00;	// PORTC is output for states
     /* Insert your solution below */
-    l_state = C_start;
+    l_state = l_start;
     while (1) {
-        Tick_C();
+        Tick();
     }
     return 1;
 }
