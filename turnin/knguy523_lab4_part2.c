@@ -14,7 +14,7 @@
 #include "simAVRHeader.h"
 #endif
 
-enum C_states {C_start, C_waitPress, C_inc, C_dec, C_waitFall, C_reset} c_state;
+enum C_states {C_start, C_waitPress, C_inc, C_dec, C_waitI, C_waitD, C_reset} c_state;
 
 void Tick_C(){
     switch(c_state){
@@ -37,8 +37,11 @@ void Tick_C(){
             }
             break;
         case C_inc:
+	    c_state = C_waitI;
+	    break;
+	case C_waitI:
 	    if((PINA & 0x03) == 0x01){
-            	c_state = C_waitFall;
+            	c_state = C_waitI;
 	    }
 	    else if((PINA & 0x03) == 0x02){
             	c_state = C_dec;
@@ -51,8 +54,11 @@ void Tick_C(){
 		c_state = C_waitPress;
             break;
         case C_dec:
+	    c_state = C_waitD;
+	    break;
+	case C_waitD:
 	    if((PINA & 0x03) == 0x02){
-            	c_state = C_waitFall;
+            	c_state = C_waitD;
 	    }
 	    else if((PINA & 0x03) == 0x01){
             	c_state = C_inc;
@@ -63,20 +69,6 @@ void Tick_C(){
 	    }
 	    else 
 		c_state = C_waitPress;
-            break;
-        case C_waitFall:
-            if((PINA & 0x03) == 0x01){
-                c_state = C_waitFall;
-            }
-            else if((PINA & 0x03) == 0x02){
-                c_state = C_waitFall;
-            }
-            else if((PINA & 0x03) == 0x03){
-		c_state = C_reset;
-            }
-            else {
-                c_state = C_waitPress;
-            }
             break;
         case C_reset:
             c_state = C_waitPress;
@@ -96,12 +88,14 @@ void Tick_C(){
                 PORTC++;
             }
             break;
+	case C_waitI:
+	    break;
+	case C_waitD:
+	    break;
         case C_dec:
             if(PORTC > 0x00){
                 PORTC--;
             }
-            break;
-        case C_waitFall:
             break;
         case C_reset:
             PORTC = 0x00; break;
