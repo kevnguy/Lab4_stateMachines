@@ -116,11 +116,11 @@ int main(void) {
 	DDRA = 0x00; PORTA = 0x03;	// PORTA is input
 	DDRC = 0xFF; PORTB = 0x00;	// PORTC is output
     /* Insert your solution below */
-	//unsigned char temp = 0x00;
+	unsigned char temp = 0x00;
 	c_state = C_start;
     while (1) {
         Tick_C();
-	//temp = PORTC;
+	temp = PORTC;
     }
     return 1;
 }
