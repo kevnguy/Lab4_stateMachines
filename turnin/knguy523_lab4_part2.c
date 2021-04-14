@@ -54,7 +54,7 @@ void Tick_C(){
             	c_state = C_waitFall;
 	    else if((PINA & 0x03) == 0x03){
 		c_state = C_waitPress;
-		PORTC == 0x00;
+		PORTC = 0x00;
 	    }
 	    else 
 		c_state = C_waitPress;
