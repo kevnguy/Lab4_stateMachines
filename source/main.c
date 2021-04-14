@@ -2,9 +2,9 @@
  *  Partner(s) Name: 
  *	Lab Section:
  *	Assignment: Lab #4  Exercise #2
- *	Exercise Description: Buttons are connected to PA0 and PA1. Output for PORTC is initially 7. Pressing PA0 
+ *	Exercise Description: Buttons are connected to PA0 and PA1. Output for PORTC is waitPressially 7. Pressing PA0 
  *	increments PORTC once (stopping at 9). Pressing PA1 decrements PORTC once (stopping at 0). 
- *	If both buttons are depressed (even if not initially simultaneously), PORTC resets to 0. 
+ *	If both buttons are depressed (even if not waitPressially simultaneously), PORTC resets to 0. 
  *		
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
@@ -14,17 +14,15 @@
 #include "simAVRHeader.h"
 #endif
 
-enum C_states {C_start, C_init, C_waitPress, C_inc, C_dec, C_waitFall, C_reset} c_state;
+enum C_states {C_start, C_waitPress, C_inc, C_dec, C_waitFall, C_reset} c_state;
 
 void Tick_C(){
     switch(c_state){
         case C_start:
-            c_state = C_init;
-            break;
-	case C_init:
             c_state = C_waitPress;
+	    PORTC = 0x07;
             break;
-        case C_waitPress:
+	case C_waitPress:
             if((PINA & 0x03) == 0x01){
                 c_state = C_inc;
             }
@@ -78,12 +76,12 @@ void Tick_C(){
             c_state = C_waitPress;
             break;
         default:
-            c_state = C_init;
+            c_state = C_waitPress;
             break;
     }
 
     switch(c_state){
-        case C_init:
+        case C_start:
             PORTC = 0x07; break;
         case C_waitPress:
             break;
@@ -108,7 +106,7 @@ void Tick_C(){
 }
 
 int main(void) {
-    /* Insert DDR and PORT initializations */
+    /* Insert DDR and PORT waitPressializations */
 	DDRA = 0x00; PORTA = 0x03;	// PORTA is input
 	DDRC = 0xFF; PORTB = 0x00;	// PORTC is output
     /* Insert your solution below */
