@@ -18,17 +18,14 @@
 #include "simAVRHeader.h"
 #endif
 
-enum l_states {l_start, l_init, l_waitPressPnd, l_Pnd, l_unlock, l_lock} l_state;
+enum l_states {l_start, l_wait, l_Pnd, l_unlock, l_lock} l_state;
 
 void Tick(){
     switch(l_state){
         case l_start:
-            l_state = l_init;
+            l_state = l_wait;
             break;
-	case l_init:
-            l_state = l_waitPressPnd;
-            break;
-        case l_waitPressPnd:
+	case l_wait:
             if((PINA & 0x87) == 0x04){
                 l_state = l_Pnd;
             }
@@ -36,7 +33,7 @@ void Tick(){
 		l_state = l_lock;
 	    }
             else{
-                l_state = l_waitPressPnd;
+                l_state = l_wait;
             }
             break;
         case l_Pnd:
@@ -47,7 +44,7 @@ void Tick(){
 		l_state = l_Pnd;
 	    }
 	    else{
-		l_state = l_init;
+		l_state = l_wait;
 	    }
             break;
         case l_unlock:
@@ -55,26 +52,25 @@ void Tick(){
 		l_state = l_unlock;
 	    }
 /*	    else{
-		l_state = init;
+		l_state = wait;
 	    } */
 	    else if((PINA & 0x87) == 0x80)
 		l_state = l_lock;
             break;
         case l_lock:
-	    l_state = l_waitPressPnd;
+	    l_state = l_wait;
 	    break;
         default:
-            l_state = l_init;
+            l_state = l_wait;
             break;
     }
 
     switch(l_state){
-        case l_init:
+        case l_start:
             PORTC = l_state;
 	    PORTB = 0x00; 
 	    break;
-        case l_waitPressPnd:
-	    PORTC = l_state;
+        case l_wait:
             break;
         case l_Pnd:
 	    PORTC = l_state;
@@ -94,12 +90,12 @@ void Tick(){
 }
 
 int main(void) {
-    /* Insert DDR and PORT initializations */
+    /* Insert DDR and PORT waitializations */
 	DDRA = 0x00; PORTA = 0x87;	// PORTA is input
 	DDRB = 0xFF; PORTB = 0x00;	// PORTB is output for lock
 	DDRC = 0xFF; PORTB = 0x00;	// PORTC is output for states
     /* Insert your solution below */
-    l_state = l_init;
+    l_state = l_start;
     while (1) {
         Tick();
     }
