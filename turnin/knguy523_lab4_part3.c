@@ -37,11 +37,14 @@ void Tick(){
             }
             break;
         case l_Pnd:
-	    if((PINA & 0x87) == 0x02){
+	    if((PINA & 0x87) == 0x04 || (PINA & 0x87) == 0x00){
+		l_state = l_Pnd;
+	    }		
+	    else if((PINA & 0x87) == 0x02){
 		l_state = l_unlock;
 	    }
-	    else if((PINA & 0x87) == 0x80 || (PINA & 0x87) == 0x00){
-		l_state = l_Pnd;
+	    else if((PINA & 0x87) == 0x80){
+		l_state = l_lock;
 	    }
 	    else{
 		l_state = l_wait;
