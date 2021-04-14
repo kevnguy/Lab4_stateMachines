@@ -21,10 +21,6 @@
 enum l_states {l_start, l_init, l_waitPressPnd, l_Pnd, l_unlock, l_lock} l_state;
 
 void Tick(){
-    unsigned char btnX = PINA & 0x01;
-    unsigned char btnY = PINA & 0x02;
-    unsigned char btnPnd = PINA & 0x04;
-    unsigned char btnL = PINA & 0x80;
     switch(l_state){
         case l_start:
             l_state = l_init;
@@ -33,7 +29,7 @@ void Tick(){
             l_state = l_waitPressPnd;
             break;
         case l_waitPressPnd:
-            if(!btnX && !btnY && !btnL && btnPnd){
+            if((PINA & 0x87) == 0x04){
                 l_state = l_Pnd;
             }
             else{
@@ -41,10 +37,10 @@ void Tick(){
             }
             break;
         case l_Pnd:
-	    if(!btnX && btnY && !btnL && !btnPnd){
+	    if((PINA & 0x87) == 0x02){
 		l_state = l_unlock;
 	    }
-	    else if(btnPnd){
+	    else if((PINA & 0x87) == 0x80){
 		l_state = l_Pnd;
 	    }
 	    else{
@@ -52,13 +48,13 @@ void Tick(){
 	    }
             break;
         case l_unlock:
-	    if(btnY || PINA == 0x00){
+	    if((PINA & 0x87) == 0x02 || PINA == 0x00){
 		l_state = l_unlock;
 	    }
 /*	    else{
 		l_state = init;
 	    } */
-	    else if(btnL)
+	    else if((PINA & 0x87) == 0x80)
 		l_state = l_lock;
             break;
         case l_lock:
