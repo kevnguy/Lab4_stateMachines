@@ -39,10 +39,10 @@ void Tick_C(){
             }
             break;
         case C_inc:
-	    if((PINA & 0x03) == 0x02)
+	    if((PINA & 0x03) == 0x01){
             	c_state = C_waitFall;
+	    }
 	    else if((PINA & 0x03) == 0x03){
-		c_state = C_reset;
 		c_state = C_waitPress;
 		PORTC = 0x00;
 	    }
@@ -50,8 +50,9 @@ void Tick_C(){
 		c_state = C_waitPress;
             break;
         case C_dec:
-	    if((PINA & 0x03) == 0x02)
+	    if((PINA & 0x03) == 0x02){
             	c_state = C_waitFall;
+	    }
 	    else if((PINA & 0x03) == 0x03){
 		c_state = C_waitPress;
 		PORTC = 0x00;
@@ -111,11 +112,11 @@ int main(void) {
 	DDRA = 0x00; PORTA = 0x03;	// PORTA is input
 	DDRC = 0xFF; PORTB = 0x00;	// PORTC is output
     /* Insert your solution below */
-	unsigned char temp = 0x00;
+	//unsigned char temp = 0x00;
 	c_state = C_start;
     while (1) {
         Tick_C();
-	temp = PORTC;
+	//temp = PORTC;
     }
     return 1;
 }
