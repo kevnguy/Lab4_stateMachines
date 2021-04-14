@@ -14,56 +14,30 @@
 # An example set of tests is shown below. It is important to note that these tests are not "unit tests" in 
 # that they are not ran in isolation but in the order shown and the state of the device is not reset or 
 # altered in between executions (unless preconditions are used).
-tests = [ {'description': 'PINA: 0x00 [10] => PORTB: 0x00, PORTC:0x02',
-    'steps': [ {'inputs': [('PINA',0x00)], 'iterations': 10 } ],
-    'expected': [('PORTB',0x00), ('PORTC', 0x02)],
-    },
-    {'description': 'PINA: 0x00, 0x04, 0x02, 0x00  => PORTB: 0x01, PORTC: 0x04',
-    'steps': [ {'inputs': [('PINA', 0x00)],'iterations': 1}, # Set PIN to val then run one iteration
-               {'inputs': [('PINA', 0x04)],'iterations': 1}, 
-               {'inputs': [('PINA', 0x02)],'iterations': 1}, 
-               {'inputs': [('PINA', 0x00)],'iterations': 1}, 
+tests = [
+ 
+    {'description': 'count up to 2 down to 1, PINA: 0x01 => PORTC: 1',
+    'steps': [ {'inputs': [('PINA', 0x03)],'iterations': 1}, # Set PIN to val then run one iteration
+               {'inputs': [('PINA', 0x03)],'iterations': 1},
+               {'inputs': [('PINA', 0x03)],'iterations': 1},
+               {'inputs': [('PINA', 0x00)],'iterations': 1},
                ],
-    'expected': [('PORTB',0x01), ('PORTC', 0x04)],
+    'expected': [('PORTC', 0x01)],
     },
-    {'description': 'PINA: 0x00, 0x04, 0x02, 0x00, 0x80, 0x00 => PORTB: 0x00, PORTC: 0x02',
-    'steps': [ {'inputs': [('PINA', 0x00)],'iterations': 1}, # Set PIN to val then run one iteration
-               {'inputs': [('PINA', 0x04)],'iterations': 1}, 
-               {'inputs': [('PINA', 0x02)],'iterations': 1}, 
-               {'inputs': [('PINA', 0x00)],'iterations': 1}, 
-               {'inputs': [('PINA', 0x80)],'iterations': 1}, 
-               {'inputs': [('PINA', 0x00)],'iterations': 1}, 
-               ],
-    'expected': [('PORTB',0x00), ('PORTC', 0x02)],
-    },
-    {'description': 'PINA: 0x00, 0x04, 0x01 => PORTB: 0x00, PORTC: 0x01',
-    'steps': [ {'inputs': [('PINA', 0x00)],'iterations': 1}, # Set PIN to val then run one iteration
-               {'inputs': [('PINA', 0x04)],'iterations': 1}, 
-               {'inputs': [('PINA', 0x01)],'iterations': 1}, 
-               ],
-    'expected': [('PORTB',0x00), ('PORTC', 0x01)],
-    },
-    {'description': 'PINA: 0x00, 0x04, 0x00, 0x02, 0x00 => PORTB: 0x01, PORTC: 0x04',
+    {'description': 'count up to 2 down to 1, PINA: 0x01 => PORTC: 1',
     'steps': [ {'inputs': [('PINA', 0x00)],'iterations': 1},
-	       {'inputs': [('PINA', 0x04)],'iterations': 1},  
-               {'inputs': [('PINA', 0x00)],'iterations': 1}, 
-               {'inputs': [('PINA', 0x02)],'iterations': 1}, 
-               {'inputs': [('PINA', 0x00)],'iterations': 1}, 
+	       {'inputs': [('PINA', 0x01)],'iterations': 1}, 
+               {'inputs': [('PINA', 0x00)],'iterations': 1},
+               {'inputs': [('PINA', 0x01)],'iterations': 1}, 
+               {'inputs': [('PINA', 0x00)],'iterations': 1},
+               {'inputs': [('PINA', 0x02)],'iterations': 1},
+               {'inputs': [('PINA', 0x00)],'iterations': 1},
                ],
-    'expected': [('PORTB',0x01), ('PORTC', 0x04)],
-    },
-    {'description': 'PINA: 0x80, 0x00, 0x04, 0x03 => PORTB: 0x00, PORTC: 0x01',
-    'steps': [ {'inputs': [('PINA', 0x80)],'iterations': 1}, # Set PIN to val then run one iteration
-               {'inputs': [('PINA', 0x00)],'iterations': 1}, 
-               {'inputs': [('PINA', 0x04)],'iterations': 1}, 
-               {'inputs': [('PINA', 0x03)],'iterations': 1}, 
-               ],
-    'expected': [('PORTB',0x00), ('PORTC', 0x01)],
+    'expected': [('PORTC', 0x01)],
     },
     ]
 
 # Optionally you can add a set of "watch" variables these need to be global or static and may need
 # to be scoped at the function level (for static variables) if there are naming conflicts. The 
 # variables listed here will display everyiterations you hit (and stop at) a breakpoint
-watch = ['main::l_state']
-
+watch = ['main::c_state', 'main::temp']
