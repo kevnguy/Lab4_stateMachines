@@ -1,11 +1,15 @@
 /*	Author: Kevin Nguyen knguy523@ucr.edu
  *  Partner(s) Name: 
  *	Lab Section:
- *	Assignment: Lab #4  Exercise #2
- *	Exercise Description: Buttons are connected to PA0 and PA1. Output for PORTC is initially 7. Pressing PA0 
- *	increments PORTC once (stopping at 9). Pressing PA1 decrements PORTC once (stopping at 0). 
- *	If both buttons are depressed (even if not initially simultaneously), PORTC resets to 0. 
- *		
+ *	Assignment: Lab #4  Exercise #3
+ *	Exercise Description: A household has a digital combination deadbolt lock system on the doorway. 
+ *	The system has buttons on a keypad. Button 'X' connects to PA0, 'Y' to PA1, and '#' to PA2. Pressing
+ *	and releasing 'Pnd', then pressing 'Y', should unlock the door by setting PB0 to 1. Any other sequence
+ *	fails to unlock. Pressing a button from inside the house (PA7) locks the door (PB0=0). For debugging
+ *	purposes, give each state a number, and always write the current state to PORTC (consider using the
+ *	enum state variable). Also, be sure to check that only one button is pressed at a time. 
+ *
+ *			
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
  */
@@ -14,85 +18,75 @@
 #include "simAVRHeader.h"
 #endif
 
-enum C_states {C_start, C_init, C_waitPress, C_inc, C_dec, C_waitFall, C_reset} c_state;
+enum l_states {l_start, l_init, l_waitPressPnd, l_Pnd, l_unlock, l_lock} l_state;
 
-void Tick_C(){
-    unsigned char btn1 = PINA & 0x01;
-    unsigned char btn2 = PINA & 0x02;
-    switch(c_state){
-        case C_start:
-            c_state = C_init;
+void Tick(){
+    switch(l_state){
+        case l_start:
+            l_state = l_init;
             break;
-	case C_init:
-            c_state = C_waitPress;
+	case l_init:
+            l_state = l_waitPressPnd;
             break;
-        case C_waitPress:
-            if(btn1 && !btn2){
-                c_state = C_inc;
+        case l_waitPressPnd:
+            if((PINA & 0x87) == 0x04){
+                l_state = l_Pnd;
             }
-            else if(!btn1 && btn2){
-                c_state = C_dec;
-            }
-            else if(btn1 && btn2){
-                c_state = C_reset;
-            }
+	    else if((PINA & 0x87) == 0x80){
+		l_state = l_lock;
+	    }
             else{
-                c_state = C_waitPress;
+                l_state = l_waitPressPnd;
             }
             break;
-        case C_inc:
-	    if(btn1)
-            	c_state = C_waitFall;
-	    else 
-		c_state = C_waitPress;
+        case l_Pnd:
+	    if((PINA & 0x87) == 0x02){
+		l_state = l_unlock;
+	    }
+	    else if((PINA & 0x87) == 0x80 || (PINA & 0x87) == 0x00){
+		l_state = l_Pnd;
+	    }
+	    else{
+		l_state = l_init;
+	    }
             break;
-        case C_dec:
-	    if(btn2)
-            	c_state = C_waitFall;
-	    else 
-		c_state = C_waitPress;
+        case l_unlock:
+	    if((PINA & 0x87) == 0x02 || PINA == 0x00){
+		l_state = l_unlock;
+	    }
+/*	    else{
+		l_state = init;
+	    } */
+	    else if((PINA & 0x87) == 0x80)
+		l_state = l_lock;
             break;
-        case C_waitFall:
-            if(btn1 && !btn2){
-                c_state = C_waitFall;
-            }
-            else if(!btn1 && btn2){
-                c_state = C_waitFall;
-            }
-            else if(btn1 && btn2){
-                c_state = C_reset;
-            }
-            else if(!btn1 && !btn2){
-                c_state = C_waitPress;
-            }
-            break;
-        case C_reset:
-            c_state = C_waitFall;
-            break;
+        case l_lock:
+	    l_state = l_waitPressPnd;
+	    break;
         default:
-            c_state = C_init;
+            l_state = l_init;
             break;
     }
 
-    switch(c_state){
-        case C_init:
-            PORTC = 0x07; break;
-        case C_waitPress:
+    switch(l_state){
+        case l_init:
+            PORTC = l_state;
+	    PORTB = 0x00; 
+	    break;
+        case l_waitPressPnd:
+	    PORTC = l_state;
             break;
-        case C_inc:
-            if(PORTC < 0x09){
-                PORTC++;
-            }
+        case l_Pnd:
+	    PORTC = l_state;
             break;
-        case C_dec:
-            if(PORTC > 0x00){
-                PORTC--;
-            }
+        case l_unlock:
+            PORTC = l_state;
+	    PORTB = 0x01;
+	    break;
+        case l_lock:
+	    PORTC = l_state;
+	    PORTB = 0x00;
             break;
-        case C_waitFall:
-            break;
-        case C_reset:
-            PORTC = 0x00; break;
         default:
             break;
     }   
@@ -101,14 +95,13 @@ void Tick_C(){
 
 int main(void) {
     /* Insert DDR and PORT initializations */
-	DDRA = 0x00; PORTA = 0x03;	// PORTA is input
-	DDRC = 0xFF; PORTB = 0x00;	// PORTC is output
+	DDRA = 0x00; PORTA = 0x87;	// PORTA is input
+	DDRB = 0xFF; PORTB = 0x00;	// PORTB is output for lock
+	DDRC = 0xFF; PORTB = 0x00;	// PORTC is output for states
     /* Insert your solution below */
-	unsigned char temp = 0x00;
-	c_state = C_start;
+    l_state = l_init;
     while (1) {
-        Tick_C();
-	temp = PORTC;
+        Tick();
     }
     return 1;
 }

@@ -99,7 +99,7 @@ int main(void) {
 	DDRB = 0xFF; PORTB = 0x00;	// PORTB is output for lock
 	DDRC = 0xFF; PORTB = 0x00;	// PORTC is output for states
     /* Insert your solution below */
-    l_state = l_start;
+    l_state = l_init;
     while (1) {
         Tick();
     }
