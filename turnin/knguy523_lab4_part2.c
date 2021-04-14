@@ -14,7 +14,7 @@
 #include "simAVRHeader.h"
 #endif
 
-enum C_states {C_start, C_init, C_waitPress, C_inc, C_dec, C_waitFall, C_reset, C_waitFallR} c_state;
+enum C_states {C_start, C_init, C_waitPress, C_inc, C_dec, C_waitFall, C_reset} c_state;
 
 void Tick_C(){
     unsigned char btn1 = PINA & 0x01;
@@ -23,7 +23,7 @@ void Tick_C(){
         case C_start:
             c_state = C_init;
             break;
-	    case C_init:
+	case C_init:
             c_state = C_waitPress;
             break;
         case C_waitPress:
@@ -41,10 +41,16 @@ void Tick_C(){
             }
             break;
         case C_inc:
-            c_state = C_waitFall;
+	    if(btn1)
+            	c_state = C_waitFall;
+	    else 
+		c_state = C_waitPress;
             break;
         case C_dec:
-            c_state = C_waitFall;
+	    if(btn2)
+            	c_state = C_waitFall;
+	    else 
+		c_state = C_waitPress;
             break;
         case C_waitFall:
             if(btn1 && !btn2){
@@ -61,16 +67,8 @@ void Tick_C(){
             }
             break;
         case C_reset:
-            c_state = C_waitFallR;
+            c_state = C_waitFall;
             break;
-        case C_waitFallR:
-            if(!btn1 && !btn2){
-                c_state = C_waitPress;
-            }
-            else{
-                c_state = C_waitFallR;
-            }
-            break; 
         default:
             c_state = C_init;
             break;
@@ -95,8 +93,6 @@ void Tick_C(){
             break;
         case C_reset:
             PORTC = 0x00; break;
-        case C_waitFallR:
-            break;
         default:
             break;
     }   
@@ -108,9 +104,11 @@ int main(void) {
 	DDRA = 0x00; PORTA = 0x03;	// PORTA is input
 	DDRC = 0xFF; PORTB = 0x00;	// PORTC is output
     /* Insert your solution below */
-    c_state = C_start;
+	unsigned char temp = 0x00;
+	c_state = C_start;
     while (1) {
         Tick_C();
+	temp = PORTC;
     }
     return 1;
 }

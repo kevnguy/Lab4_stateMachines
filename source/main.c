@@ -1,11 +1,11 @@
 /*	Author: Kevin Nguyen knguy523@ucr.edu
  *  Partner(s) Name: 
  *	Lab Section:
- *	Assignment: Lab #4  Exercise #1
- *	Exercise Description: PB0 and PB1 each connect to an LED, and PB0's LED is initially on.
- *	Pressing a button connected to PA0 turns off PB0's LED and turns on PB1's LED, staying that way
- *	after button release. Pressing the button again turns off PB1's LED and turns on PB0's LED
- *	
+ *	Assignment: Lab #4  Exercise #2
+ *	Exercise Description: Buttons are connected to PA0 and PA1. Output for PORTC is initially 7. Pressing PA0 
+ *	increments PORTC once (stopping at 9). Pressing PA1 decrements PORTC once (stopping at 0). 
+ *	If both buttons are depressed (even if not initially simultaneously), PORTC resets to 0. 
+ *		
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
  */
@@ -14,51 +14,86 @@
 #include "simAVRHeader.h"
 #endif
 
-enum LED_states {LED_init, LED_waitPress, LED_switch, LED_waitFall} LED_state;
+enum C_states {C_start, C_init, C_waitPress, C_inc, C_dec, C_waitFall, C_reset} c_state;
 
-void Tick_LED(){
-    switch(LED_state){
-	    case LED_init:
-            LED_state = LED_waitPress;
+void Tick_C(){
+    unsigned char btn1 = PINA & 0x01;
+    unsigned char btn2 = PINA & 0x02;
+    switch(c_state){
+        case C_start:
+            c_state = C_init;
             break;
-        case LED_waitPress:
-            if(PINA & 0x01){
-                LED_state = LED_switch;
+	case C_init:
+            c_state = C_waitPress;
+            break;
+        case C_waitPress:
+            if(btn1 && !btn2){
+                c_state = C_inc;
+            }
+            else if(!btn1 && btn2){
+                c_state = C_dec;
+            }
+            else if(btn1 && btn2){
+                c_state = C_reset;
             }
             else{
-                LED_state = LED_waitPress;
+                c_state = C_waitPress;
             }
             break;
-        case LED_switch:
-            LED_state = LED_waitFall;
+        case C_inc:
+	    if(btn1)
+            	c_state = C_waitFall;
+	    else 
+		c_state = C_waitPress;
             break;
-        case LED_waitFall:
-            if(PINA & 0x01){
-                LED_state = LED_waitFall;
+        case C_dec:
+	    if(btn2)
+            	c_state = C_waitFall;
+	    else 
+		c_state = C_waitPress;
+            break;
+        case C_waitFall:
+            if(btn1 && !btn2){
+                c_state = C_waitFall;
             }
-            else{
-                LED_state = LED_waitPress;
+            else if(!btn1 && btn2){
+                c_state = C_waitFall;
             }
+            else if(btn1 && btn2){
+                c_state = C_reset;
+            }
+            else if(!btn1 && !btn2){
+                c_state = C_waitPress;
+            }
+            break;
+        case C_reset:
+            c_state = C_waitFall;
             break;
         default:
-            LED_state = LED_init;
+            c_state = C_init;
             break;
     }
 
-    switch(LED_state){
-        case LED_init:
-            PORTB = 0x01; break;
-        case LED_waitPress:
+    switch(c_state){
+        case C_init:
+            PORTC = 0x07; break;
+        case C_waitPress:
             break;
-        case LED_switch:
-	    if((PORTB & 0x03) == 0x01)
-           	 PORTB = 0x02;
-	    else
-		 PORTB = 0x01;
-	    break;
-        case LED_waitFall:
+        case C_inc:
+            if(PORTC < 0x09){
+                PORTC++;
+            }
             break;
-         default:
+        case C_dec:
+            if(PORTC > 0x00){
+                PORTC--;
+            }
+            break;
+        case C_waitFall:
+            break;
+        case C_reset:
+            PORTC = 0x00; break;
+        default:
             break;
     }   
 
@@ -66,12 +101,14 @@ void Tick_LED(){
 
 int main(void) {
     /* Insert DDR and PORT initializations */
-	DDRA = 0x00; PORTA = 0x00;	// PORTA is input
-	DDRB = 0xFF; PORTB = 0x01;	// PORTB is output
+	DDRA = 0x00; PORTA = 0x03;	// PORTA is input
+	DDRC = 0xFF; PORTB = 0x00;	// PORTC is output
     /* Insert your solution below */
-	LED_state = LED_init;
+	unsigned char temp = 0x00;
+	c_state = C_start;
     while (1) {
-        Tick_LED();
+        Tick_C();
+	temp = PORTC;
     }
     return 1;
 }
