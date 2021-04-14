@@ -40,6 +40,9 @@ void Tick_C(){
 	    if((PINA & 0x03) == 0x01){
             	c_state = C_waitFall;
 	    }
+	    else if((PINA & 0x03) == 0x02){
+            	c_state = C_dec;
+	    }
 	    else if((PINA & 0x03) == 0x03){
 		c_state = C_waitPress;
 		PORTC = 0x00;
@@ -50,6 +53,9 @@ void Tick_C(){
         case C_dec:
 	    if((PINA & 0x03) == 0x02){
             	c_state = C_waitFall;
+	    }
+	    else if((PINA & 0x03) == 0x01){
+            	c_state = C_inc;
 	    }
 	    else if((PINA & 0x03) == 0x03){
 		c_state = C_waitPress;
