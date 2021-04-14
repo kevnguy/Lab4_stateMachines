@@ -67,7 +67,7 @@ void Tick_C(){
             }
             break;
         case C_reset:
-            c_state = C_waitFall;
+            c_state = C_waitPress;
             break;
         default:
             c_state = C_init;
