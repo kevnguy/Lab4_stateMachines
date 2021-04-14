@@ -46,7 +46,7 @@ void Tick(){
 		    l_state = l_lock;
 		}
 	    }
-	    else if(btnPnd){
+	    else if(btnPnd || PINA == 0x00){
 		l_state = l_Pnd;
 	    }
 	    else{
