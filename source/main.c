@@ -17,8 +17,6 @@
 enum C_states {C_start, C_init, C_waitPress, C_inc, C_dec, C_waitFall, C_reset} c_state;
 
 void Tick_C(){
-    unsigned char btn1 = PINA & 0x01;
-    unsigned char btn2 = PINA & 0x02;
     switch(c_state){
         case C_start:
             c_state = C_init;
@@ -27,42 +25,51 @@ void Tick_C(){
             c_state = C_waitPress;
             break;
         case C_waitPress:
-            if(btn1 && !btn2){
+            if((PINA & 0x03) == 0x01){
                 c_state = C_inc;
             }
-            else if(!btn1 && btn2){
+            else if((PINA & 0x03) == 0x02){
                 c_state = C_dec;
             }
-            else if(btn1 && btn2){
-                c_state = C_reset;
+            else if((PINA & 0x03) == 0x03){ 
+		c_state = C_reset;
             }
             else{
                 c_state = C_waitPress;
             }
             break;
         case C_inc:
-	    if(btn1)
+	    if((PINA & 0x03) == 0x02)
             	c_state = C_waitFall;
+	    else if((PINA & 0x03) == 0x03){
+		c_state = C_reset;
+		c_state = C_waitPress;
+		PORTC = 0x00;
+	    }
 	    else 
 		c_state = C_waitPress;
             break;
         case C_dec:
-	    if(btn2)
+	    if((PINA & 0x03) == 0x02)
             	c_state = C_waitFall;
+	    else if((PINA & 0x03) == 0x03){
+		c_state = C_waitPress;
+		PORTC == 0x00;
+	    }
 	    else 
 		c_state = C_waitPress;
             break;
         case C_waitFall:
-            if(btn1 && !btn2){
+            if((PINA & 0x03) == 0x01){
                 c_state = C_waitFall;
             }
-            else if(!btn1 && btn2){
+            else if((PINA & 0x03) == 0x02){
                 c_state = C_waitFall;
             }
-            else if(btn1 && btn2){
-                c_state = C_reset;
+            else if((PINA & 0x03) == 0x03){
+		c_state = C_reset;
             }
-            else if(!btn1 && !btn2){
+            else {
                 c_state = C_waitPress;
             }
             break;

@@ -90,4 +90,3 @@ tests = [ {'description': 'PINA: 0x00 [10] => PORTC: 0x07',
 # to be scoped at the function level (for static variables) if there are naming conflicts. The 
 # variables listed here will display everyiterations you hit (and stop at) a breakpoint
 watch = ['main::c_state', 'main::temp']
-
