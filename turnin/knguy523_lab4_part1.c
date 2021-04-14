@@ -37,7 +37,7 @@ void Tick_LED(){
                 LED_state = LED_waitFall;
             }
             else{
-                LED_state = LED_init;
+                LED_state = LED_waitPress;
             }
             break;
         default:
@@ -51,7 +51,11 @@ void Tick_LED(){
         case LED_waitPress:
             break;
         case LED_switch:
-            PORTB = 0x02; break;
+	    if((PORTB & 0x03) == 0x01)
+           	 PORTB = 0x02;
+	    else
+		 PORTB = 0x01;
+	    break;
         case LED_waitFall:
             break;
          default:
@@ -65,7 +69,6 @@ int main(void) {
 	DDRA = 0x00; PORTA = 0x00;	// PORTA is input
 	DDRB = 0xFF; PORTB = 0x01;	// PORTB is output
     /* Insert your solution below */
-	unsigned char tempB = 0x00;
 	LED_state = LED_init;
     while (1) {
         Tick_LED();

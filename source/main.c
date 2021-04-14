@@ -1,9 +1,11 @@
 /*	Author: Kevin Nguyen knguy523@ucr.edu
  *  Partner(s) Name: 
  *	Lab Section:
- *	Assignment: Lab #4  Exercise #5
- *	Exercise Description: Extend exercise 3 to lock when inputing code
- *			
+ *	Assignment: Lab #4  Exercise #1
+ *	Exercise Description: PB0 and PB1 each connect to an LED, and PB0's LED is initially on.
+ *	Pressing a button connected to PA0 turns off PB0's LED and turns on PB1's LED, staying that way
+ *	after button release. Pressing the button again turns off PB1's LED and turns on PB0's LED
+ *	
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
  */
@@ -12,104 +14,51 @@
 #include "simAVRHeader.h"
 #endif
 
-enum l_states {l_start, l_init, l_waitPress, l_correct, l_wrong, l_unlock, l_lock} l_state;
-unsigned char seq[4] = { 0x04, 0x01, 0x02, 0x01};
-unsigned char i = 0x00;
+enum LED_states {LED_init, LED_waitPress, LED_switch, LED_waitFall} LED_state;
 
-void Tick(){
-    // unsigned char btnX = PINA & 0x01;
-    // unsigned char btnY = PINA & 0x02;
-    // unsigned char btnPnd = PINA & 0x04;
-    unsigned char btnL = PINA & 0x80;
-    unsigned char isopen = PORTB & 0x01;
-
-    unsigned char tempA = PINA & 0x87;
-    switch(l_state){
-        case l_start:
-            l_state = l_init;
+void Tick_LED(){
+    switch(LED_state){
+	    case LED_init:
+            LED_state = LED_waitPress;
             break;
-	case l_init:
-            l_state = l_waitPress;
-            break;
-        case l_waitPress:
-            if(tempA == 0x00){
-                l_state = l_waitPress;
+        case LED_waitPress:
+            if(PINA & 0x01){
+                LED_state = LED_switch;
             }
-	    else if(tempA == seq[i]){
-		l_state = l_correct;
-		i++;
-	    }
-            else if(btnL == 0x80){
-                l_state = l_lock;
+            else{
+                LED_state = LED_waitPress;
             }
-	    else{
-		l_state = l_wrong;
-	    }
             break;
-        case l_correct:
-	    if(i == 0x03){
-		if(!isopen){
-		    l_state = l_unlock;
-		}
-		else{
-		    l_state = l_lock;
-		}
-	    }
-	    else if(btnL){
-		l_state = l_lock;
-	    }
-	    else{
-		l_state = l_waitPress;
-	//	i++;
-	    }
+        case LED_switch:
+            LED_state = LED_waitFall;
             break;
-	case l_wrong:
-	    l_state = l_init;
-	    break;
-        case l_unlock:
-	    if(tempA == 0x01){
-		l_state = l_unlock;
-	    }
-	    else if(btnL){
-		l_state = l_lock;
-	    }
-	    else{	
-		l_state = l_waitPress; 
-	    } 
+        case LED_waitFall:
+            if(PINA & 0x01){
+                LED_state = LED_waitFall;
+            }
+            else{
+                LED_state = LED_waitPress;
+            }
             break;
-        case l_lock:
-	    l_state = l_waitPress;
-	    break;
         default:
-            l_state = l_init;
+            LED_state = LED_init;
             break;
     }
 
-    switch(l_state){
-        case l_init:
-            PORTC = l_state;
-	    PORTB = 0x00;
-	    i = 0x00; 
-	    break;
-        case l_waitPress:
-	    PORTC = l_state;
+    switch(LED_state){
+        case LED_init:
+            PORTB = 0x01; break;
+        case LED_waitPress:
             break;
-        case l_correct:
-	    PORTC = l_state;
-	   // i++;
-            break;
-	case l_wrong:
-	    PORTC = l_state;
+        case LED_switch:
+	    if((PORTB & 0x03) == 0x01)
+           	 PORTB = 0x02;
+	    else
+		 PORTB = 0x01;
 	    break;
-        case l_unlock:
-            PORTC = l_state;
-	    PORTB = 0x01;
-	    break;
-        case l_lock:
-	    PORTC = l_state;
-	    PORTB = 0x00;
+        case LED_waitFall:
             break;
-        default:
+         default:
             break;
     }   
 
@@ -117,13 +66,12 @@ void Tick(){
 
 int main(void) {
     /* Insert DDR and PORT initializations */
-	DDRA = 0x00; PORTA = 0x87;	// PORTA is input
-	DDRB = 0xFF; PORTB = 0x00;	// PORTB is output for lock
-	DDRC = 0xFF; PORTB = 0x00;	// PORTC is output for states
+	DDRA = 0x00; PORTA = 0x00;	// PORTA is input
+	DDRB = 0xFF; PORTB = 0x01;	// PORTB is output
     /* Insert your solution below */
-    l_state = l_start;
+	LED_state = LED_init;
     while (1) {
-        Tick();
+        Tick_LED();
     }
     return 1;
 }

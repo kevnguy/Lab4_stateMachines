@@ -18,11 +18,11 @@ tests = [ {'description': 'PINA: 0x00 [10] => PORTB = 0x01',
     'steps': [ {'inputs': [('PINA',0x00)], 'iterations': 10 } ],
     'expected': [('PORTB',0x01)],
     },
-    {'description': 'PINA: 0x00, 0x01 [3], 0x00 => PORTB = 0x01',
+    {'description': 'PINA: 0x00, 0x01 [3], 0x00 => PORTB = 0x02',
     'steps': [ {'inputs': [('PINA', 0x00)],'iterations': 1}, # Set PIN to val then run one iteration
                {'inputs': [('PINA', 0x01)],'iterations': 3}, 
                {'inputs': [('PINA', 0x00)],'iterations': 1}, ],
-    'expected': [('PORTB', 0x01)],
+    'expected': [('PORTB', 0x02)],
     },
     {'description': 'PINA: 0x00, 0x01 [3], 0x00, 0x01 [3] => PORTB = 0x02',
     'steps': [ {'inputs': [('PINA', 0x00)],'iterations': 1}, # Set PIN to val then run one iteration
