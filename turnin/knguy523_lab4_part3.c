@@ -18,7 +18,7 @@
 #include "simAVRHeader.h"
 #endif
 
-enum l_states {l_start, l_wait, l_Pnd, l_unlock, l_lock} l_state;
+enum l_states {l_start, l_wait, l_Pnd, l_Y, l_unlock, l_lock} l_state;
 
 void Tick(){
     switch(l_state){
@@ -33,20 +33,30 @@ void Tick(){
 		l_state = l_lock;
 	    }
             else{
-                l_state = l_start;
+                l_state = l_wait;
             }
             break;
         case l_Pnd:
-	    if((PINA & 0x87) == 0x04 || (PINA & 0x87) == 0x00){
+	    if((PINA & 0x87) == 0x04){
 		l_state = l_Pnd;
 	    }		
-	    else if((PINA & 0x87) == 0x02){
-		l_state = l_unlock;
+	    else if((PINA & 0x87) == 0x00){
+		l_state = l_Y;
 	    }	   
 	    else{
 		l_state = l_start;
 	    }
             break;
+	case l_Y:
+	    if((PINA & 0x87) == 0x02){
+		l_state = l_unlock;
+	    }
+	    else if((PINA & 0x87) == 0x00){
+		l_state = l_Y;
+	    }
+	    else{
+		l_state = l_start;
+	    }
         case l_unlock:
 	    if((PINA & 0x87) == 0x02 || PINA == 0x00){
 		l_state = l_unlock;
@@ -73,6 +83,9 @@ void Tick(){
         case l_Pnd:
 	    PORTC = l_state;
             break;
+	case l_Y:
+	    PORTC = l_Y;
+	    break;
         case l_unlock:
             PORTC = l_state;
 	    PORTB = 0x01;

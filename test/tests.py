@@ -32,8 +32,10 @@ tests = [ {'description': 'PINA: 0x00 => PORTB: 0x00, PORTC:0x00',
     'expected': [('PORTB',0x00)],
     },
     {'description': 'PINA: 0x04, 0x06 => PORTB: 0x00, PORTC: 0x04',
-    'steps': [ {'inputs': [('PINA', 0x04)],'iterations': 2}, # Set PIN to val then run one iteration
-               {'inputs': [('PINA', 0x06)],'iterations': 2}, 
+    'steps': [ {'inputs': [('PINA', 0x00)],'iterations': 1}, # Set PIN to val then run one iteration
+               {'inputs': [('PINA', 0x04)],'iterations': 6}, 
+               {'inputs': [('PINA', 0x02)],'iterations': 6}, 
+               {'inputs': [('PINA', 0x00)],'iterations': 6}, 
                ],
     'expected': [('PORTB',0x00)],
     },
